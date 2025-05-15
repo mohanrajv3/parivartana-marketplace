@@ -221,7 +221,7 @@ const Dashboard = () => {
                       <div className="text-center py-4">
                         <p className="text-gray-500">No listings yet</p>
                         <Button 
-                          onClick={() => navigate('/sell')} 
+                          onClick={() => setLocation('/sell')} 
                           variant="outline" 
                           className="mt-2"
                         >
@@ -385,7 +385,7 @@ const Dashboard = () => {
                           )}
                           <ProductCard 
                             product={product} 
-                            onClick={() => navigate(`/product/${product.id}`)} 
+                            onClick={() => setLocation(`/product/${product.id}`)} 
                           />
                         </div>
                       ))}
@@ -397,7 +397,7 @@ const Dashboard = () => {
                       <p className="text-gray-500 mb-4">
                         You haven't listed any items for sale yet.
                       </p>
-                      <Button onClick={() => navigate('/sell')} className="bg-primary-500 hover:bg-primary-600">
+                      <Button onClick={() => setLocation('/sell')} className="bg-primary-500 hover:bg-primary-600">
                         List Your First Item
                       </Button>
                     </div>
@@ -419,7 +419,7 @@ const Dashboard = () => {
                     <p className="text-gray-500 mb-4">
                       You haven't made any purchases or contacted sellers yet.
                     </p>
-                    <Button onClick={() => navigate('/marketplace')} className="bg-primary-500 hover:bg-primary-600">
+                    <Button onClick={() => setLocation('/marketplace')} className="bg-primary-500 hover:bg-primary-600">
                       Browse Marketplace
                     </Button>
                   </div>
@@ -549,7 +549,7 @@ const Dashboard = () => {
                       <Button 
                         variant="outline" 
                         className="mt-6 w-full" 
-                        onClick={() => navigate('/profile/edit')}
+                        onClick={() => setLocation('/profile/edit')}
                       >
                         <Settings className="mr-2 h-4 w-4" /> Edit Profile
                       </Button>

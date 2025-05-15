@@ -123,6 +123,8 @@ const ProductForm = () => {
         if (paymentResult) {
           // Success - invalidate products query to refresh listings
           queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+          // Also invalidate the seller's product list
+          queryClient.invalidateQueries({ queryKey: ['/api/products?sellerId=1'] });
           
           toast({
             title: "Product Listed Successfully",

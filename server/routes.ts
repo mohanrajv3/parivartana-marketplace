@@ -29,7 +29,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Products
   app.get("/api/products", async (req, res) => {
     try {
-      const { category, limit = "10" } = req.query;
+      const { category, limit = "10", sellerId } = req.query;
+      
+      if (sellerId) {
+        const products = await storage.getProductsBySeller(parseInt(sellerId as string, 10));
+        return res.json(products);
+      }
       
       if (category && typeof category === "string") {
         const products = await storage.getProductsByCategory(category);

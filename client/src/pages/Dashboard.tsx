@@ -31,7 +31,7 @@ import ProductCard from '@/components/marketplace/ProductCard';
 
 const Dashboard = () => {
   const { currentUser, loading, logout } = useAuth();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   
   // Check for tab from query parameter
   const queryParams = new URLSearchParams(window.location.search);
@@ -48,9 +48,9 @@ const Dashboard = () => {
   useEffect(() => {
     // Redirect to login if not authenticated
     if (!loading && !currentUser) {
-      navigate('/login?redirect=/dashboard');
+      setLocation('/login?redirect=/dashboard');
     }
-  }, [currentUser, loading, navigate]);
+  }, [currentUser, loading, setLocation]);
 
   // Fetch user's products
   const { data: userProducts, isLoading: isLoadingProducts } = useQuery<Product[]>({
@@ -118,7 +118,7 @@ const Dashboard = () => {
             <h1 className="text-3xl font-display font-bold text-gray-800">Dashboard</h1>
             <p className="text-gray-600">Manage your listings and purchases</p>
           </div>
-          <Button onClick={() => navigate('/sell')} className="bg-primary-500 hover:bg-primary-600">
+          <Button onClick={() => setLocation('/sell')} className="bg-primary-500 hover:bg-primary-600">
             <PlusCircle className="mr-2 h-4 w-4" /> List New Item
           </Button>
         </div>

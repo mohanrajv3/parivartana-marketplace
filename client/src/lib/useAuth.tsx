@@ -1,14 +1,14 @@
-import { 
-  createContext, 
-  useContext, 
-  useState, 
-  useEffect, 
-  ReactNode 
-} from "react";
-import { auth, signInWithGoogle, loginWithEmailPassword, registerWithEmailPassword, logOut } from "./firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "./queryClient";
+
+// Simple User interface to replace Firebase's User
+export interface User {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL: string | null;
+  isAdmin: boolean;
+}
 
 interface AuthContextType {
   currentUser: User | null;
@@ -24,57 +24,22 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user);
-      
-      if (user) {
-        try {
-          // Check if user exists in our database, if not register them
-          // This is just a simulation since we're using in-memory storage
-          const idToken = await user.getIdToken();
-          try {
-            // Check if user exists in our backend
-            const response = await fetch('/api/users/firebase/' + user.uid, {
-              credentials: 'include',
-            });
-            
-            if (response.status === 404) {
-              // If user doesn't exist in our backend, create the user
-              await apiRequest('POST', '/api/users', {
-                username: user.displayName || user.email?.split('@')[0] || 'user',
-                email: user.email || 'unknown@example.com',
-                displayName: user.displayName || user.email?.split('@')[0] || 'User',
-                photoURL: user.photoURL || '',
-                firebaseUid: user.uid,
-                role: 'user'
-              });
-            } else if (response.ok) {
-              const userData = await response.json();
-              setIsAdmin(userData.role === 'admin');
-            }
-          } catch (error) {
-            console.error("Error checking/creating user in backend:", error);
-          }
-        } catch (error) {
-          console.error("Error getting Firebase ID token:", error);
-        }
-      }
-      
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const googleSignIn = async () => {
     try {
       setLoading(true);
-      const user = await signInWithGoogle();
+      // Simulate a successful Google sign-in
+      const user: User = {
+        uid: 'google-user-123',
+        email: 'user@example.com',
+        displayName: 'Google User',
+        photoURL: null,
+        isAdmin: false
+      };
+      setCurrentUser(user);
       return user;
     } catch (error) {
       toast({
@@ -91,7 +56,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const user = await loginWithEmailPassword(email, password);
+      
+      // Check if this is our admin user
+      const isAdminUser = email === 'admin@example.com';
+      setIsAdmin(isAdminUser);
+      
+      const user: User = {
+        uid: 'email-user-' + Date.now(),
+        email: email,
+        displayName: email.split('@')[0],
+        photoURL: null,
+        isAdmin: isAdminUser
+      };
+      
+      setCurrentUser(user);
       return user;
     } catch (error) {
       toast({
@@ -108,18 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (email: string, password: string, username: string) => {
     try {
       setLoading(true);
-      const user = await registerWithEmailPassword(email, password);
-      if (user) {
-        // Register user in our backend
-        await apiRequest('POST', '/api/users', {
-          username,
-          email: user.email || email,
-          displayName: username,
-          photoURL: user.photoURL || '',
-          firebaseUid: user.uid,
-          role: 'user'
-        });
-      }
+      const user: User = {
+        uid: 'new-user-' + Date.now(),
+        email: email,
+        displayName: username,
+        photoURL: null,
+        isAdmin: false
+      };
+      
+      setCurrentUser(user);
       return user;
     } catch (error) {
       toast({
@@ -135,7 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await logOut();
+      setCurrentUser(null);
       setIsAdmin(false);
     } catch (error) {
       toast({

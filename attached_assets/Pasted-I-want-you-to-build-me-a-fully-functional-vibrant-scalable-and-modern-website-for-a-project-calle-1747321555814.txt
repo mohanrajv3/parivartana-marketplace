@@ -1,0 +1,208 @@
+I want you to build me a fully functional, vibrant, scalable, and modern website for a project called Parivartana.
+
+📘 What is Parivartana?
+Parivartana is a sustainability-focused marketplace that enables students to buy, sell, and exchange items such as books, electronics, clothes, stationery, and more within a campus or between nearby student communities.
+
+🎯 Goals:
+Promote reuse, recycle, and reduce waste on campuses.
+
+Enable affordable access to essentials for students.
+
+Build a community-driven platform fostering sustainability and savings.
+
+Become the go-to second-hand student exchange marketplace.
+
+💸 Revenue Model:
+Sellers pay a platform listing fee (e.g., ₹20).
+
+If the product is sold and delivery is confirmed, the seller receives 50% of the listing fee back (i.e., cashback).
+
+Buyers can browse all items for free, but to access seller contact details, they must pay a nominal access fee (e.g., ₹5 per contact).
+
+Optional: Add premium features, ads, and targeted promotions later.
+Website Requirements:
+🖥️ Pages & Navigation Flow:
+Home Page
+
+Vibrant hero section with the tagline: "Swap Smart. Save More. Sustain the Future."
+
+Buttons:
+
+🔍 “Browse Products” → redirects to /marketplace
+
+📦 “List an Item” → redirects to /sell
+
+👤 “Login / Signup” → /login
+
+💡 “How It Works” → /about
+
+Marketplace Page (/marketplace)
+
+Filter by category using icons:
+
+📚 Books
+
+💻 Electronics
+
+👕 Clothes
+
+✏️ Stationery
+
+🧸 Misc
+
+Sort by: Recently Added, Price Low to High, etc.
+
+Click on product → goes to /product/:id page.
+
+Product Details Page (/product/:id)
+
+Shows item details, price, condition, seller rating.
+
+💬 “Contact Seller” button → prompts login + payment if not yet paid.
+
+Sell Item Page (/sell)
+
+Form to list an item: title, description, category, condition, price, upload image.
+
+Pay listing fee.
+
+After submission, redirect to confirmation page.
+
+Login / Signup Page (/login)
+
+Social login + student email verification.
+
+About Page (/about)
+
+Explains the mission, values, revenue model.
+
+Dashboard (/dashboard)
+
+For sellers to manage items.
+
+For buyers to track purchases.
+
+Admin Panel (/admin)
+
+Monitor listings, verify abuse, manage payments.
+
+Firebase Integration (Required)
+Authentication: Firebase Auth (Google + Email/Password).
+
+Database: Firestore (users, products, carts, transactions).
+
+Image Upload: Firebase Storage.
+
+Functions: Optional Cloud Functions for cashback & logic.
+
+Hosting Ready: Must be deployable with firebase deploy.
+
+Include a firebase.js file that exports the config and all services. additionally Home Page (/)
+Hero section with background gradient or abstract image.
+
+Buttons:
+
+🔍 Browse Items → /marketplace
+
+➕ List an Item → /sell
+
+👤 Login / Signup → /login
+
+ℹ️ How It Works → /about
+
+Marketplace (/marketplace)
+Filter by category (icon-based):
+📚 Books, 💻 Electronics, 👕 Clothes, ✏️ Stationery, 🧸 Misc
+
+Product Cards (modern UI with icons, hover effect).
+
+Click → Go to /product/:id
+
+Product Page (/product/:id)
+View full item info.
+Add to Cart 🛒
+
+💬 “Contact Seller” → redirect to /pay-to-unlock
+
+Sell Page (/sell)
+Upload form: title, price, category, description, image.
+Integrate payment API (Stripe/Razorpay) to collect listing fee.
+
+Login / Signup (/login)
+Firebase Auth: Google, email/password login.
+
+User Account Page (/account)
+View listed items.
+
+View purchased items.
+
+Edit profile (name, image, etc.).
+
+Firebase Firestore-based dashboard.
+
+Cart Page (/cart)
+Shows items added by the buyer.
+Button to "Contact Seller" (paywall via Razorpay).
+
+Admin Panel (/admin)
+View reports, approve products, refund logic.
+Output Requirements:
+Clean file structure.
+Commented code.
+
+One-click deployment to Firebase Hosting or Replit.
+
+Use .env.example for environment variables.
+
+Include README.md with setup instructions.
+Design Guidelines:
+Use vibrant, psychologically appealing color palette (yellow, teal, purple, etc.).
+
+Use icons instead of images for categories to enhance clarity and loading speed.
+
+Apply glassmorphism or neumorphism subtly in cards or popups.
+
+Responsive and mobile-friendly.
+
+Include CTA buttons with hover effects and animations.
+
+Floating 🛒 cart or quick-access buttons on mobile.
+
+Nice background gradients or light textures at right places (e.g., hero section, footer).
+
+⚙️ Technical Requirements:
+Use React + Tailwind CSS (or Next.js preferred for routing).
+
+Backend: Node.js + Express + MongoDB (or Firebase).
+
+Secure user auth using JWT or Firebase Auth.
+
+Use Stripe or Razorpay API for payments.
+
+Add REST API endpoints for: posting items, retrieving listings, user management, payments.
+
+Backend should be deployed-ready (include simple .env template).
+
+UI components must follow accessibility standards (ARIA, keyboard nav).
+
+🌐 Optional Enhancements:
+Add real-time chat between buyer and seller.
+
+Add dark/light mode toggle.
+
+Add QR code for pickup verification.
+
+Auto image compression on upload.
+
+Email notifications for interest/sale.
+
+🧪 Testing:
+Include dummy data to populate marketplace.
+
+Write some unit tests for product form and payment flow.
+
+✅ Make it plug-and-play: Once you generate the full project, it should be deployable instantly on Replit, Vercel, or Netlify with minimal configuration. Use icons from react-icons or similar.
+
+➕ Please also provide the full folder structure and clear comments for all files.
+
+🚀 This site should be beautiful, functional, and optimized — better UX than Flipkart or Amazon for a student-focused second-hand marketplace.

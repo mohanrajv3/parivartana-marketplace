@@ -72,8 +72,8 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByFirebaseUid(uid: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.firebaseUid === uid);
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
@@ -87,6 +87,9 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id, 
       createdAt: now,
+      displayName: insertUser.displayName || insertUser.username,
+      photoURL: insertUser.photoURL || null,
+      role: insertUser.role || 'user'
     };
     this.users.set(id, user);
     return user;
@@ -124,7 +127,8 @@ export class MemStorage implements IStorage {
       id,
       createdAt: now,
       updatedAt: now,
-      isSold: false
+      isSold: false,
+      imageUrl: product.imageUrl || null
     };
     this.products.set(id, newProduct);
     return newProduct;
@@ -154,7 +158,10 @@ export class MemStorage implements IStorage {
     const newTransaction: Transaction = {
       ...transaction,
       id,
-      createdAt: now
+      createdAt: now,
+      productId: transaction.productId || null,
+      buyerId: transaction.buyerId || null,
+      paymentId: transaction.paymentId || null
     };
     this.transactions.set(id, newTransaction);
     return newTransaction;
@@ -213,7 +220,8 @@ export class MemStorage implements IStorage {
     const newReview: Review = {
       ...review,
       id,
-      createdAt: now
+      createdAt: now,
+      comment: review.comment || null
     };
     this.reviews.set(id, newReview);
     return newReview;

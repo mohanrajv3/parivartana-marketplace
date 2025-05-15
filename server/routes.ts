@@ -240,16 +240,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/firebase/:uid", async (req, res) => {
+  app.get("/api/users/email/:email", async (req, res) => {
     try {
-      const { uid } = req.params;
-      const user = await storage.getUserByFirebaseUid(uid);
+      const { email } = req.params;
+      const user = await storage.getUserByEmail(email);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
       res.json(user);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  // Add a route for user authentication
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // In a real app, you would compare hashed passwords
+      // For now, just simulate successful authentication
+      if (password !== user.password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // Don't send the password back to the client
+      const { password: _, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  // Registration route
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { username, email, password, displayName } = req.body;
+      
+      if (!username || !email || !password) {
+        return res.status(400).json({ message: "Username, email, and password are required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "User with this email already exists" });
+      }
+      
+      // Create new user
+      const newUser = await storage.createUser({
+        username,
+        email,
+        password, // In a real app, this would be hashed
+        displayName: displayName || username,
+        role: 'user'
+      });
+      
+      // Don't send the password back to the client
+      const { password: _, ...userWithoutPassword } = newUser;
+      
+      res.status(201).json(userWithoutPassword);
     } catch (error) {
       handleError(res, error);
     }

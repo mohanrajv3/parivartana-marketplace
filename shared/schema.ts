@@ -6,13 +6,13 @@ export const userRoleEnum = pgEnum('user_role', ['user', 'admin']);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  username: text("username").notNull(),
+  username: text("username").notNull().unique(),
   email: text("email").notNull().unique(),
   displayName: text("display_name"),
   photoURL: text("photo_url"),
   role: userRoleEnum("role").default('user').notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  firebaseUid: text("firebase_uid").notNull().unique(),
+  password: text("password").notNull(), // Hashed password for local authentication
 });
 
 export const categoryEnum = pgEnum('category', ['books', 'electronics', 'clothes', 'stationery', 'misc']);

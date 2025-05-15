@@ -9,8 +9,8 @@ import {
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
-  getUserByFirebaseUid(uid: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
   // Product operations

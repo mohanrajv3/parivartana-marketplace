@@ -107,9 +107,10 @@ const ProductForm = () => {
         sellerId: 1, // This would be the actual user ID in a real app
       };
 
-      const product = await apiRequest("POST", "/api/products", productData);
+      const response = await apiRequest("POST", "/api/products", productData);
+      const product = await response.json();
       
-      if (product) {
+      if (product && product.id) {
         // Process the listing fee
         const paymentResult = await processListingFee(product.id, {
           amount: 2000, // ₹20 in paisa
@@ -128,10 +129,12 @@ const ProductForm = () => {
           
           toast({
             title: "Product Listed Successfully",
-            description: "Your item has been listed on the marketplace.",
+            description: "Your item has been listed on the marketplace. View it in your dashboard.",
+            // Success toast - no variant needed for default style
           });
           
-          setLocation("/marketplace");
+          // Redirect to dashboard instead of marketplace to see the listing
+          setLocation("/dashboard?tab=listings");
         }
       }
     } catch (error) {

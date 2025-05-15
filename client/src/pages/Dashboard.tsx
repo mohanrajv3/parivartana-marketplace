@@ -37,6 +37,13 @@ const Dashboard = () => {
   const queryParams = new URLSearchParams(window.location.search);
   const tabParam = queryParams.get('tab');
   const [activeTab, setActiveTab] = useState(tabParam || 'overview');
+  
+  // Update active tab when URL query parameter changes
+  useEffect(() => {
+    if (tabParam && ['overview', 'listings', 'purchases', 'transactions', 'profile'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // When tab changes, update URL without navigating
   const handleTabChange = (value: string) => {

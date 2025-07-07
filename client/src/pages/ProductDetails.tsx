@@ -1,18 +1,16 @@
-import { useState } from 'react';
-import { useRoute, useLocation } from 'wouter';
+import { useAuth } from '@/lib/useAuth';
+import { Product } from '@shared/schema';
 import { useQuery } from '@tanstack/react-query';
 import { Helmet } from 'react-helmet-async';
-import { useAuth } from '@/lib/useAuth';
-import { queryClient } from '@/lib/queryClient';
-import { Product } from '@shared/schema';
+import { useLocation, useRoute } from 'wouter';
 
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import ContactSellerModal from '@/components/ui/ContactSellerModal';
-import { Calendar, DollarSign, Star, ArrowLeft, Tag, Info, MapPin } from 'lucide-react';
-import { FaBook, FaLaptop, FaTshirt, FaPencilAlt, FaPuzzlePiece } from 'react-icons/fa';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, Calendar, Info, MapPin, Star, Tag } from 'lucide-react';
+import { FaBook, FaLaptop, FaPencilAlt, FaPuzzlePiece, FaTshirt } from 'react-icons/fa';
 
 const ProductDetails = () => {
   const [match, params] = useRoute('/product/:id');

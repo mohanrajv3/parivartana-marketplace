@@ -1,20 +1,20 @@
-import { Helmet } from 'react-helmet-async';
-import { Link } from 'wouter';
-import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { FaRecycle, FaLeaf, FaWallet, FaHandshake } from 'react-icons/fa';
+import { Helmet } from 'react-helmet-async';
+import { FaHandshake, FaLeaf, FaRecycle, FaWallet } from 'react-icons/fa';
+import { Link } from 'wouter';
 
 const About = () => {
   const faqs = [
     {
       question: "How much does it cost to list an item?",
-      answer: "It costs ₹20 to list an item on Parivartana. You'll receive 50% (₹10) back as cashback when your item is sold."
+      answer: "It's completely free to list items on Parivartana."
     },
     {
       question: "How much does it cost to contact a seller?",
-      answer: "Buyers pay a ₹5 fee to access a seller's contact information for a specific listing."
+      answer: "Contacting sellers is completely free for all users."
     },
     {
       question: "How do I meet with buyers/sellers?",
@@ -30,7 +30,7 @@ const About = () => {
     },
     {
       question: "How long will my listing stay active?",
-      answer: "Listings remain active for 60 days. After that, you can choose to relist the item by paying the listing fee again."
+      answer: "Listings remain active for 60 days. After that, you can easily relist the item for free if it hasn't sold yet."
     }
   ];
 
@@ -126,7 +126,7 @@ const About = () => {
                         </div>
                         <div>
                           <h4 className="text-lg font-semibold mb-1">List Your Item</h4>
-                          <p className="text-gray-600">Take clear photos and provide an honest description. Pay a ₹20 listing fee.</p>
+                          <p className="text-gray-600">Take clear photos and provide an honest description. Completely free!</p>
                         </div>
                       </div>
                       
@@ -136,7 +136,7 @@ const About = () => {
                         </div>
                         <div>
                           <h4 className="text-lg font-semibold mb-1">Get Paid</h4>
-                          <p className="text-gray-600">Meet the buyer on campus, complete the sale, and receive 50% of your listing fee back.</p>
+                          <p className="text-gray-600">Meet the buyer on campus, complete the sale, and receive the full amount.</p>
                         </div>
                       </div>
                     </div>
@@ -163,7 +163,7 @@ const About = () => {
                         </div>
                         <div>
                           <h4 className="text-lg font-semibold mb-1">Contact Seller</h4>
-                          <p className="text-gray-600">Pay a ₹5 access fee to contact the seller and arrange a meeting on campus.</p>
+                          <p className="text-gray-600">Contact the seller for free and arrange a meeting on campus.</p>
                         </div>
                       </div>
                     </div>
@@ -174,59 +174,44 @@ const About = () => {
           </div>
         </section>
 
-        {/* Revenue model section */}
-        <section className="py-16 bg-white" id="pricing">
+        {/* Platform features section */}
+        <section className="py-16 bg-white" id="features">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-3xl font-display font-bold text-center mb-8">Our Revenue Model</h2>
+              <h2 className="text-3xl font-display font-bold text-center mb-8">100% Free Platform</h2>
               <p className="text-center text-gray-600 mb-12">
-                Parivartana uses a simple and transparent fee structure to maintain the platform and promote sustainability.
+                Parivartana is completely free to use for all students. No hidden costs, ever.
               </p>
 
               <div className="bg-gradient-to-br from-primary-50 to-secondary-50 rounded-xl p-6 md:p-8 border border-gray-100 shadow-sm mb-8">
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="md:grid md:grid-cols-1 gap-6">
                   <div>
                     <h3 className="text-xl font-semibold mb-3 flex items-center text-primary-700">
                       <span className="bg-primary-100 p-2 rounded-full mr-2">
                         <FaLeaf className="text-primary-500" />
                       </span>
-                      For Sellers
+                      Everything Is Free
                     </h3>
                     <ul className="space-y-3 text-gray-700">
                       <li className="flex items-start">
                         <span className="text-primary-500 mr-2">•</span>
-                        <span><strong>₹20</strong> listing fee per item</span>
+                        <span>List unlimited items</span>
                       </li>
                       <li className="flex items-start">
                         <span className="text-primary-500 mr-2">•</span>
-                        <span><strong>₹10</strong> cashback when the item sells</span>
+                        <span>60-day listing duration</span>
                       </li>
                       <li className="flex items-start">
                         <span className="text-primary-500 mr-2">•</span>
-                        <span>Listings active for 60 days</span>
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3 flex items-center text-secondary-700">
-                      <span className="bg-secondary-100 p-2 rounded-full mr-2">
-                        <FaWallet className="text-secondary-500" />
-                      </span>
-                      For Buyers
-                    </h3>
-                    <ul className="space-y-3 text-gray-700">
-                      <li className="flex items-start">
-                        <span className="text-secondary-500 mr-2">•</span>
-                        <span>Browse all listings for <strong>free</strong></span>
+                        <span>Full search functionality</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="text-secondary-500 mr-2">•</span>
-                        <span><strong>₹5</strong> to unlock seller contact info</span>
+                        <span className="text-primary-500 mr-2">•</span>
+                        <span>Messaging system to contact sellers</span>
                       </li>
                       <li className="flex items-start">
-                        <span className="text-secondary-500 mr-2">•</span>
-                        <span>No commission on purchases</span>
+                        <span className="text-primary-500 mr-2">•</span>
+                        <span>No commissions or hidden fees</span>
                       </li>
                     </ul>
                   </div>
@@ -234,7 +219,7 @@ const About = () => {
               </div>
 
               <p className="text-center text-gray-600 text-sm">
-                All fees are reinvested into maintaining the platform and promoting campus sustainability initiatives.
+                Parivartana is maintained and supported by student volunteers who believe in a sustainable campus community.
               </p>
             </div>
           </div>
@@ -271,8 +256,7 @@ const About = () => {
                 <p className="font-medium text-gray-800 mb-4">Contact Information</p>
                 <div className="space-y-2 mb-6">
                   <p className="text-gray-600">Email: <a href="mailto:hello@parivartana.org" className="text-primary-500 hover:underline">hello@parivartana.org</a></p>
-                  <p className="text-gray-600">Campus Office: Student Center, Room 304</p>
-                  <p className="text-gray-600">Hours: Monday-Friday, 11am-4pm</p>
+                  <p className="text-gray-600">Mobile: +91 98765 43210</p>
                 </div>
                 
                 <Separator className="my-6" />

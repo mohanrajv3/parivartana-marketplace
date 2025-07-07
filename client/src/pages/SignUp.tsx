@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
-import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/lib/useAuth';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useLocation } from 'wouter';
 
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -16,13 +19,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { AlertCircle, Loader2, Lock, Mail, User } from 'lucide-react';
 import { FaGoogle } from 'react-icons/fa';
 import { Link } from 'wouter';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Checkbox } from '@/components/ui/checkbox';
 
 const formSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
@@ -265,7 +265,7 @@ const SignUp = () => {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-primary-500 hover:bg-primary-600"
+                  className="w-full"
                   disabled={isLoading}
                 >
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

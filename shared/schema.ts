@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+import { boolean, integer, pgEnum, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -38,17 +38,17 @@ export const transactions = pgTable("transactions", {
   sellerId: integer("seller_id").notNull().references(() => users.id),
   buyerId: integer("buyer_id").references(() => users.id),
   amount: integer("amount").notNull(), // Stored in smallest currency unit (paisa)
-  transactionType: text("transaction_type").notNull(), // listing_fee, contact_fee, cashback
+  type: text("type").notNull(), // sale, purchase
   status: text("status").notNull(), // pending, completed, refunded
-  paymentId: text("payment_id"), // External payment reference
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-// Contact access tracks which buyers have paid to contact which sellers for which products
+// Contact access tracks buyers who can access seller contact info
 export const contactAccess = pgTable("contact_access", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").notNull().references(() => products.id),
   buyerId: integer("buyer_id").notNull().references(() => users.id),
+  sellerId: integer("seller_id").notNull().references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -57,7 +57,7 @@ export const reviews = pgTable("reviews", {
   id: serial("id").primaryKey(),
   productId: integer("product_id").notNull().references(() => products.id),
   reviewerId: integer("reviewer_id").notNull().references(() => users.id),
-  reviewedId: integer("reviewed_id").notNull().references(() => users.id), // The person being reviewed
+  userId: integer("user_id").notNull().references(() => users.id), // The person being reviewed
   rating: integer("rating").notNull(), // 1-5 star rating
   comment: text("comment"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -1,44 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
-import { Helmet } from 'react-helmet-async';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/lib/useAuth';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient } from '@/lib/queryClient';
-import { apiRequest } from '@/lib/queryClient';
 import { Product, Transaction, User } from '@shared/schema';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useLocation } from 'wouter';
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Users, 
-  Package, 
-  CreditCard, 
-  AlertTriangle, 
-  Search, 
-  Loader2,
-  Check,
-  X,
-  BarChart3,
-  ArrowUpRight,
-  ArrowDownRight
-} from 'lucide-react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,7 +17,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import {
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  CreditCard,
+  MoreHorizontal,
+  Package,
+  Search,
+  Users
+} from 'lucide-react';
 
 const Admin = () => {
   const { currentUser, isAdmin, loading } = useAuth();
@@ -80,7 +76,7 @@ const Admin = () => {
     enabled: !!currentUser && isAdmin,
   });
 
-  // Mock mutation to approve product
+  // Mutation to approve product
   const approveProductMutation = useMutation({
     mutationFn: (productId: number) => {
       return apiRequest('PATCH', `/api/products/${productId}`, { isApproved: true });
@@ -90,7 +86,17 @@ const Admin = () => {
     }
   });
 
-  // Mock mutation to reject product
+  // Mutation to mark product as sold
+  const markAsSoldMutation = useMutation({
+    mutationFn: (productId: number) => {
+      return apiRequest('PATCH', `/api/products/${productId}`, { isSold: true });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+    }
+  });
+
+  // Mutation to reject product
   const rejectProductMutation = useMutation({
     mutationFn: (productId: number) => {
       return apiRequest('DELETE', `/api/products/${productId}`, {});
@@ -332,7 +338,7 @@ const Admin = () => {
                             {transactions.slice(0, 5).map((transaction) => (
                               <TableRow key={transaction.id}>
                                 <TableCell className="font-medium">
-                                  {transaction.transactionType === 'listing_fee' ? 'Listing Fee' : 'Contact Fee'}
+                                  {transaction.transactionType === 'listing_fee' ? 'Sale' : 'Contact Fee'}
                                 </TableCell>
                                 <TableCell>{formatCurrency(transaction.amount)}</TableCell>
                                 <TableCell>
@@ -432,6 +438,14 @@ const Admin = () => {
                                       <DropdownMenuItem onClick={() => navigate(`/product/${product.id}`)}>
                                         View Details
                                       </DropdownMenuItem>
+                                      {!product.isSold && (
+                                        <DropdownMenuItem 
+                                          onClick={() => markAsSoldMutation.mutate(product.id)}
+                                          disabled={markAsSoldMutation.isPending}
+                                        >
+                                          Mark as Sold
+                                        </DropdownMenuItem>
+                                      )}
                                       <DropdownMenuItem 
                                         onClick={() => approveProductMutation.mutate(product.id)}
                                         disabled={approveProductMutation.isPending}
@@ -599,7 +613,7 @@ const Admin = () => {
                               <TableRow key={transaction.id}>
                                 <TableCell className="font-medium">{transaction.id}</TableCell>
                                 <TableCell>
-                                  {transaction.transactionType === 'listing_fee' ? 'Listing Fee' : 'Contact Fee'}
+                                  {transaction.transactionType === 'listing_fee' ? 'Sale' : 'Contact Fee'}
                                 </TableCell>
                                 <TableCell>{formatCurrency(transaction.amount)}</TableCell>
                                 <TableCell>
@@ -627,7 +641,7 @@ const Admin = () => {
                                       </DropdownMenuItem>
                                       <DropdownMenuSeparator />
                                       <DropdownMenuItem className="text-red-600">
-                                        Refund Transaction
+                                        Cancel Transaction
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>

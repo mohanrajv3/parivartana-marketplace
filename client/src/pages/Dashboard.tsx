@@ -1,37 +1,40 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
-import { Helmet } from 'react-helmet-async';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useAuth } from '@/lib/useAuth';
-import { useQuery } from '@tanstack/react-query';
 import { Product, Transaction } from '@shared/schema';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { useLocation } from 'wouter';
 
+import ProductCard from '@/components/marketplace/ProductCard';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Package, 
-  ShoppingBag, 
-  CreditCard, 
-  Star, 
-  Settings, 
-  PlusCircle,
-  Tag,
-  DollarSign,
+import {
+  AlertCircle,
   Clock,
-  AlertCircle
+  CreditCard,
+  DollarSign,
+  Package,
+  PlusCircle,
+  Settings,
+  ShoppingBag,
+  Star,
+  Tag
 } from 'lucide-react';
-import ProductCard from '@/components/marketplace/ProductCard';
 
 const Dashboard = () => {
   const { currentUser, loading, logout } = useAuth();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
   
   // Check for tab from query parameter
   const queryParams = new URLSearchParams(window.location.search);
@@ -70,6 +73,38 @@ const Dashboard = () => {
     queryKey: ['/api/transactions/user/1'], // Replace with actual user ID in a real app
     enabled: !!currentUser,
   });
+  
+  // Mark product as sold mutation
+  const markProductAsSoldMutation = useMutation({
+    mutationFn: async (productId: number) => {
+      const response = await apiRequest("PATCH", `/api/products/${productId}/mark-sold`, {});
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate product queries to refresh UI
+      queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/products?sellerId=1'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/transactions/user/1'] });
+      
+      toast({
+        title: "Product Marked as Sold!",
+        description: "The product has been marked as sold and a transaction record has been created.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error marking product as sold:", error);
+      toast({
+        title: "Failed to Mark as Sold",
+        description: "There was an error marking this product as sold. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Function to mark a product as sold
+  const markProductAsSold = (productId: number) => {
+    markProductAsSoldMutation.mutate(productId);
+  };
 
   if (loading) {
     return (
@@ -105,7 +140,7 @@ const Dashboard = () => {
   const soldItems = userProducts?.filter(p => p.isSold)?.length || 0;
   
   const totalEarnings = userTransactions
-    ?.filter(t => t.transactionType === 'listing_fee' && t.status === 'completed' && t.sellerId === 1) // Hard-coded ID for demo
+    ?.filter(t => t.type === 'sale' && t.status === 'completed' && t.sellerId === 1) // Hard-coded ID for demo
     ?.reduce((sum, t) => sum + t.amount, 0) || 0;
   
   const pendingPayments = userTransactions
@@ -263,19 +298,19 @@ const Dashboard = () => {
                           <div key={transaction.id} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
                             <div className="flex items-center space-x-3">
                               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                transaction.transactionType === 'listing_fee' 
-                                  ? 'bg-primary-100 text-primary-500' 
+                                transaction.type === 'sale' 
+                                  ? 'bg-green-100 text-green-500' 
                                   : 'bg-accent-100 text-accent-500'
                               }`}>
-                                {transaction.transactionType === 'listing_fee' ? (
-                                  <Tag className="h-5 w-5" />
-                                ) : (
+                                {transaction.type === 'sale' ? (
                                   <DollarSign className="h-5 w-5" />
+                                ) : (
+                                  <ShoppingBag className="h-5 w-5" />
                                 )}
                               </div>
                               <div>
                                 <p className="font-medium text-gray-800">
-                                  {transaction.transactionType === 'listing_fee' ? 'Listing Fee' : 'Contact Fee'}
+                                  {transaction.type === 'sale' ? 'Item Sold' : 'Purchase'}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                   <Clock className="inline h-3 w-3 mr-1" />
@@ -383,11 +418,24 @@ const Dashboard = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                       {userProducts.map((product) => (
                         <div key={product.id} className="relative">
-                          {product.isSold && (
+                          {product.isSold ? (
                             <div className="absolute inset-0 bg-white bg-opacity-75 z-10 flex items-center justify-center">
                               <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium text-sm">
                                 Sold
                               </div>
+                            </div>
+                          ) : (
+                            <div className="absolute top-2 right-2 z-10">
+                              <Button 
+                                size="sm" 
+                                className="bg-green-600 hover:bg-green-700 text-white" 
+                                onClick={(e) => {
+                                  e.stopPropagation(); // Prevent card click
+                                  markProductAsSold(product.id);
+                                }}
+                              >
+                                Mark as Sold
+                              </Button>
                             </div>
                           )}
                           <ProductCard 

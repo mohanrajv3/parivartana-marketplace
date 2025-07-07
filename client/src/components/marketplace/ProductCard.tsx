@@ -1,5 +1,5 @@
-import { Star } from 'lucide-react';
 import { Product } from '@shared/schema';
+import { Star } from 'lucide-react';
 
 export interface ProductCardProps {
   product: Product;
@@ -72,7 +72,7 @@ const ProductCard = ({ product, onClick }: ProductCardProps) => {
         <img 
           src={product.imageUrl || getPlaceholderImage(product.category)} 
           alt={product.title} 
-          className="w-full h-48 object-cover"
+          className="w-full"
         />
         <span className={`absolute top-3 left-3 ${getCategoryBadgeClass(product.category)} text-xs font-semibold px-2 py-1 rounded`}>
           {getCategoryLabel(product.category)}

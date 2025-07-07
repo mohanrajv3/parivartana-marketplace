@@ -1,15 +1,19 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/lib/useAuth";
 import { usePayment } from "@/lib/usePayment";
-import { apiRequest } from "@/lib/queryClient";
-import { queryClient } from "@/lib/queryClient";
-import { productValidationSchema } from "@shared/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useLocation } from "wouter";
+import { z } from "zod";
 
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,8 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -29,9 +31,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, Loader2 } from "lucide-react";
 
-const formSchema = productValidationSchema.extend({
+const formSchema = z.object({
+  title: z.string().min(3, { message: "Title must be at least 3 characters" }),
+  description: z.string().min(10, { message: "Description must be at least 10 characters" }),
+  price: z.number().min(1, { message: "Price must be at least ₹1" }),
+  category: z.string(),
+  condition: z.string(),
   image: z.instanceof(FileList).optional().refine(
     (files) => !files || files.length === 0 || (files.length === 1 && files[0].size <= 5 * 1024 * 1024),
     {
@@ -40,17 +48,17 @@ const formSchema = productValidationSchema.extend({
   ),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
 const ProductForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [submittedProduct, setSubmittedProduct] = useState(null);
   const { toast } = useToast();
   const { currentUser } = useAuth();
   const { processListingFee, isLoading: isPaymentLoading } = usePayment();
   const [, setLocation] = useLocation();
 
-  const form = useForm<FormValues>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
@@ -61,12 +69,12 @@ const ProductForm = () => {
     },
   });
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        setImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     } else {
@@ -74,7 +82,7 @@ const ProductForm = () => {
     }
   };
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data) => {
     if (!currentUser) {
       toast({
         title: "Authentication Required",
@@ -88,15 +96,10 @@ const ProductForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Upload image if provided - in a real app this would upload to Firebase Storage
-      let imageUrl = null;
-      if (data.image && data.image.length > 0) {
-        // Simulate image upload - in a real app this would upload to Firebase Storage
-        // For demo purposes, we'll just use the preview URL
-        imageUrl = imagePreview;
-      }
+      // Handle image (simplified for demo)
+      let imageUrl = imagePreview;
 
-      // Create the product first
+      // Create the product
       const productData = {
         title: data.title,
         description: data.description,
@@ -104,7 +107,7 @@ const ProductForm = () => {
         category: data.category,
         condition: data.condition,
         imageUrl: imageUrl || null,
-        sellerId: 1, // This would be the actual user ID in a real app
+        sellerId: currentUser?.id || 1, // Use actual user ID
       };
 
       const response = await apiRequest("POST", "/api/products", productData);
@@ -117,24 +120,35 @@ const ProductForm = () => {
           description: "Listing fee for " + data.title,
           metadata: {
             productId: product.id,
-            sellerId: 1, // This would be the actual user ID in a real app
+            sellerId: currentUser?.id || 1,
           },
         });
 
         if (paymentResult) {
-          // Success - invalidate products query to refresh listings
-          queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-          // Also invalidate the seller's product list
-          queryClient.invalidateQueries({ queryKey: ['/api/products?sellerId=1'] });
+          // Store product data for success message
+          setSubmittedProduct(product);
           
+          // Invalidate relevant queries
+          queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+          queryClient.invalidateQueries({ queryKey: [`/api/products?sellerId=${currentUser?.id || 1}`] });
+          
+          // Show success message
+          setShowSuccess(true);
+          
+          // Show toast notification
           toast({
-            title: "Product Listed Successfully",
-            description: "Your item has been listed on the marketplace. View it in your dashboard.",
-            // Success toast - no variant needed for default style
+            title: "Product Listed Successfully!",
+            description: "Your item has been listed on the marketplace.",
           });
           
-          // Redirect to dashboard instead of marketplace to see the listing
-          setLocation("/dashboard?tab=listings");
+          // Reset form
+          form.reset();
+          setImagePreview(null);
+          
+          // Redirect to profile after 3 seconds
+          setTimeout(() => {
+            setLocation("/dashboard?tab=listings");
+          }, 3000);
         }
       }
     } catch (error) {
@@ -148,6 +162,69 @@ const ProductForm = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (showSuccess && submittedProduct) {
+    return (
+      <div className="space-y-6">
+        <Alert className="bg-green-50 border-green-200">
+          <CheckCircle className="h-5 w-5 text-green-600" />
+          <AlertTitle className="text-green-800 text-lg font-medium">Item Listed Successfully!</AlertTitle>
+          <AlertDescription className="text-green-700">
+            <p className="mt-2">Your item "{submittedProduct.title}" has been added to the marketplace.</p>
+            <p className="mt-1">You will be redirected to your profile page in a moment...</p>
+          </AlertDescription>
+        </Alert>
+        
+        <div className="border rounded-lg p-4 bg-white">
+          <h3 className="font-medium text-lg mb-2">Product Details</h3>
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500">Title</p>
+              <p className="font-medium">{submittedProduct.title}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Price</p>
+              <p className="font-medium">₹{(submittedProduct.price / 100).toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Category</p>
+              <p className="font-medium capitalize">{submittedProduct.category}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Condition</p>
+              <p className="font-medium capitalize">{submittedProduct.condition.replace('_', ' ')}</p>
+            </div>
+          </div>
+          
+          {submittedProduct.imageUrl && (
+            <div className="mt-4">
+              <p className="text-gray-500 text-sm mb-1">Product Image</p>
+              <img 
+                src={submittedProduct.imageUrl} 
+                alt={submittedProduct.title} 
+                className="w-32 h-32 object-cover rounded-md border" 
+              />
+            </div>
+          )}
+        </div>
+        
+        <div className="flex justify-between">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setShowSuccess(false);
+              setSubmittedProduct(null);
+            }}
+          >
+            List Another Item
+          </Button>
+          <Button onClick={() => setLocation("/dashboard?tab=listings")}>
+            Go to My Listings
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -307,18 +384,15 @@ const ProductForm = () => {
           )}
         />
         
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-sm text-yellow-800">
-          <p className="font-medium mb-1">Listing Fee</p>
-          <p>A listing fee of ₹20 will be charged. You'll receive 50% back as cashback when your item sells.</p>
-        </div>
+
         
         <Button 
           type="submit" 
-          className="w-full bg-primary-500 hover:bg-primary-600"
-          disabled={isSubmitting || isPaymentLoading}
+          className="w-full"
+          disabled={isSubmitting}
         >
-          {(isSubmitting || isPaymentLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          List Item and Pay ₹20
+          {(isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          List Item
         </Button>
       </form>
     </Form>
